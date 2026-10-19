@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>FiLM-CAM: Keyed Feature Modulation for Conditional-Access Watermarking</title>
+    <meta name="description" content="FiLM-CAM is a conditional-access image watermarking method: a secret key modulates the encoder and decoder features, so only the key holder can decode, or cleanly remove, the watermark.">
+    <meta name="theme-color" content="#0a0e16">
+
+    <meta property="og:title" content="FiLM-CAM: Keyed Feature Modulation for Conditional-Access Watermarking">
+    <meta property="og:description" content="FiLM-CAM conditions a watermarking encoder–decoder on a secret key through FiLM, so the payload can be decoded and the watermark removed only with the correct key. NeurIPS 2026.">
+    <meta property="og:image" content="https://yash-research.github.io/filmcam/images/og.jpg">
+    <meta property="og:url" content="https://yash-research.github.io/filmcam/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0e16'/%3E%3Ccircle cx='24' cy='32' r='10' fill='none' stroke='%232a78d6' stroke-width='6'/%3E%3Cpath d='M34 32h20M46 32v8M52 32v6' stroke='%23eb6834' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ===================== Hero ===================== -->
+    <header class="hero" id="top">
+        <canvas id="bitfield" aria-hidden="true"></canvas>
+        <div class="wrap">
+            <div class="venue"><span class="venue-dot">NeurIPS</span>2026 · Main Track</div>
+
+            <h1>FiLM<span class="dash">-</span>CAM</h1>
+            <p class="subtitle">Keyed Feature Modulation for <em>Conditional-Access</em> Watermarking</p>
+
+            <div class="authors">
+                <span>Yash Kulthe<sup>1,2</sup></span>
+                <span>Vishal Asnani<sup>2</sup></span>
+                <span>Shruti Agarwal<sup>2</sup></span>
+                <span>Andrew Gilbert<sup>1</sup></span>
+                <span>John Collomosse<sup>1,2</sup></span>
+            </div>
+            <div class="affils">
+                <span><sup>1</sup>DECaDE, University of Surrey, UK</span>
+                <span><sup>2</sup>Adobe Research</span>
+            </div>
+
+            <!-- TODO: replace the "#" links once the paper / code are public -->
+            <nav class="links" aria-label="Paper resources">
+                <a class="btn primary" href="#">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>
+                    Paper
+                </a>
+                <a class="btn" href="#">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 12 16M18 4 6 20"/></svg>
+                    arXiv
+                </a>
+                <span class="btn soon" aria-disabled="true">
+                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.9 1.52 2.34 1.08 2.91.83.09-.65.35-1.08.63-1.33-2.22-.25-4.55-1.11-4.55-4.94 0-1.09.39-1.98 1.03-2.68-.1-.25-.45-1.27.1-2.64 0 0 .84-.27 2.75 1.02a9.6 9.6 0 0 1 5 0c1.91-1.29 2.75-1.02 2.75-1.02.55 1.37.2 2.39.1 2.64.64.7 1.03 1.59 1.03 2.68 0 3.84-2.34 4.68-4.57 4.93.36.31.68.92.68 1.85v2.74c0 .27.18.58.69.48A10 10 0 0 0 12 2Z"/></svg>
+                    <span class="btn-label">Code<small>(coming soon)</small></span>
+                </span>
+                <a class="btn" href="#bibtex">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h3v6H6v-2a4 4 0 0 1 1-4M15 7h3v6h-4v-2a4 4 0 0 1 1-4"/><path d="M7 17h10"/></svg>
+                    BibTeX
+                </a>
+            </nav>
+
+            <p class="tldr"><b>TL;DR:</b> FiLM-CAM conditions a watermarking encoder–decoder on a secret key through feature-wise linear modulation (FiLM). The payload can be decoded, and the watermark removed, only with the correct key.</p>
+        </div>
+    </header>
+
+    <!-- Teaser -->
+    <div class="wrap teaser">
+        <figure class="tz" id="teaserCard">
+            <div class="tz-flow">
+                <div class="tz-col">
+                    <div class="tz-label">Cover image <span class="tz-hint">COCO photo</span></div>
+                    <div class="tz-img"><img src="images/scenes/01_cover.webp" width="586" height="640" alt="Cover image of a brown bear"></div>
+                </div>
+
+                <div class="tz-step" aria-hidden="true">
+                    <span class="tz-op">Embed</span>
+                    <span class="key a"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"/><path d="M11 12h10M18 12v3M21 12v2"/></svg><span>k<sub>A</sub></span></span>
+                    <span class="tz-payload">m = 1011 0010…</span>
+                    <svg class="tz-arrow" viewBox="0 0 48 12"><path d="M0 6h44M38 1l6 5-6 5"/></svg>
+                </div>
+
+                <div class="tz-col">
+                    <div class="tz-label">Watermarked <span class="tz-hint">hover to reveal residual ×10</span></div>
+                    <div class="tz-img tz-reveal" tabindex="0" aria-label="Watermarked image; focus or hover to reveal the embedded residual">
+                        <img src="images/scenes/01_wm.webp" width="586" height="640" alt="Watermarked image, visually identical to the cover">
+                        <img class="tz-res" src="images/scenes/01_res.webp" width="586" height="640" alt="Embedding residual amplified ten times">
+                    </div>
+                </div>
+
+                <div class="tz-outs">
+                    <div class="tz-group">Decode</div>
+                    <div class="tz-out">
+                        <span class="key a"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"/><path d="M11 12h10M18 12v3M21 12v2"/></svg><span>k<sub>A</sub></span></span>
+                        <span class="tz-bits ok">1011 0010…</span>
+                        <span class="badge good"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Payload recovered · 0.99</span>
+                    </div>
+                    <div class="tz-out">
+                        <span class="key b"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"/><path d="M11 12h10M18 12v3M21 12v2"/></svg><span>k<sub>B</sub></span></span>
+                        <span class="tz-bits no">0000 0000…</span>
+                        <span class="badge bad"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>Chance level · 0.53</span>
+                    </div>
+
+                    <div class="tz-group">Remove</div>
+                    <div class="tz-out">
+                        <span class="key a"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"/><path d="M11 12h10M18 12v3M21 12v2"/></svg><span>k<sub>A</sub></span></span>
+                        <img class="tz-thumb" src="images/scenes/01_rec.webp" width="586" height="640" alt="Image after removal with the correct key">
+                        <span class="badge good"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Watermark removed · 57.9 dB</span>
+                    </div>
+                    <div class="tz-out">
+                        <span class="key b"><svg viewBox="0 0 24 24"><circle cx="7" cy="12" r="4"/><path d="M11 12h10M18 12v3M21 12v2"/></svg><span>k<sub>B</sub></span></span>
+                        <img class="tz-thumb" src="images/scenes/01_wm.webp" width="586" height="640" alt="">
+                        <span class="badge bad"><svg viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></svg>Watermark survives · 0.81</span>
+                    </div>
+                </div>
+            </div>
+            <figcaption><b>Overview.</b> The image is watermarked with key k<sub>A</sub>. The same key decodes the payload and cleanly removes the watermark. Any other key k<sub>B</sub> reads nothing, and its removal attempt leaves the watermark decodable. Numbers are COCO results from the paper: bit accuracy for decoding and wrong-key removal, PSNR for correct-key removal.</figcaption>
+        </figure>
+    </div>
+
+    <!-- ===================== Sticky nav ===================== -->
+    <nav class="nav" id="nav" aria-label="Sections">
+        <div class="wrap">
+            <a class="nav-brand" href="#top">FiLM-CAM</a>
+            <div class="nav-links">
+                <a href="#overview">Overview</a>
+                <a href="#method">Method</a>
+                <a href="#results">SOTA</a>
+                <a href="#visual">Visual results</a>
+                <a href="#conditional">Conditional decoding</a>
+                <a href="#removal">Removal</a>
+                <a href="#ablations">Ablations</a>
+                <a href="#robustness">Robustness</a>
+                <a href="#bibtex">BibTeX</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+
+        <!-- ===================== Overview ===================== -->
+        <section class="section" id="overview">
+            <div class="wrap">
+                <h2>Why Conditional Watermarking?</h2>
+                <div class="prose">
+                    <p class="lede">Invisible watermarks are increasingly used to flag AI-generated media and to trace provenance. Organisations often don't want those watermarks to be open to all: they want to control who can <em>embed</em>, <em>read</em> and <em>remove</em> them. Today that means training and shipping a separate private model for every organisation.</p>
+                    <p>We propose <strong>FiLM-CAM</strong>, a conditional-access image watermarking approach that enforces authorised encoding, decoding and removal through <strong>keyed feature modulation</strong>. A secret key conditions a Feature-wise Linear Modulation (FiLM) mechanism that transforms the internal representation of the watermark signal before embedding, coupling the payload to the key at the <em>feature</em> level rather than the pixel level. The same key must be presented to the decoder to recover the payload. We train the system to maximise the gap between authorised and unauthorised use, so extraction is reliable under the correct key and fails under incorrect keys.</p>
+                    <p>The encoder is also trained to estimate the watermark residual regardless of whether a watermark is already present. Removal then needs no extra network: re-encode, subtract the residual, and refine iteratively, provided you hold the key. We evaluate FiLM-CAM across multiple encoder–decoder backbones and show that keyed feature modulation is an effective, architecture-agnostic conditional access module (CAM) for image watermarking.</p>
+                </div>
+
+                <div class="stats">
+                    <div class="card stat reveal">
+                        <div class="label">Bit accuracy, correct key</div>
+                        <div class="value">0.99</div>
+                        <div class="sub">On COCO, DIV2K and SA-1B, at ~47 dB PSNR</div>
+                    </div>
+                    <div class="card stat reveal" style="--accent: var(--orange)">
+                        <div class="label">Bit accuracy, wrong key</div>
+                        <div class="value">0.53</div>
+                        <div class="sub">Chance level is 0.50: the payload is unreadable</div>
+                    </div>
+                    <div class="card stat reveal">
+                        <div class="label">PSNR after authorised removal</div>
+                        <div class="value">57.9<small>dB</small></div>
+                        <div class="sub">COCO; regeneration attacks reach only 21–31 dB</div>
+                    </div>
+                    <div class="card stat reveal" style="--accent: var(--orange)">
+                        <div class="label">Bit accuracy after wrong-key removal</div>
+                        <div class="value">0.81</div>
+                        <div class="sub">The watermark survives an unauthorised removal attempt</div>
+                    </div>
+                </div>
+
+                <div class="pillars">
+                    <div class="card pillar reveal">
+                        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="12" r="4"/><path d="M12 12h9M18 12v3M21 12v2"/></svg></div>
+                        <h4>Keyed feature modulation</h4>
+                        <p>A lightweight Conditional Access Module maps the key to per-channel scale and shift parameters (γ, β) that modulate the embedder bottleneck and the extractor head.</p>
+                    </div>
+                    <div class="card pillar reveal">
+                        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg></div>
+                        <h4>Logit-space composition</h4>
+                        <p>The residual is added in an atanh-transformed space with an image-dependent gain. Composing there gives cleaner, more invertible removal than plain pixel addition.</p>
+                    </div>
+                    <div class="card pillar reveal">
+                        <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg></div>
+                        <h4>Removal with the same network</h4>
+                        <p>The embedder is reused to estimate the watermark residual. With the right key it is subtracted cleanly (≈54–58 dB); with a wrong key the watermark stays decodable.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Method ===================== -->
+        <section class="section" id="method">
+            <div class="wrap">
+                <h2>Method</h2>
+                <p class="lede">FiLM-CAM injects the key into the internal features of the embedder and extractor through a Conditional Access Module (CAM). Training proceeds in two stages: key-conditioned embedding and decoding, then key-conditioned removal.</p>
+
+                <figure class="figure reveal">
+                    <div class="card"><img src="images/method.webp" width="2400" height="1635" alt="Architecture of FiLM-CAM: Stage 1 key-conditioned embedding and decoding, Stage 2 watermark removal training, and the Conditional Access Module." loading="lazy" data-zoom></div>
+                    <figcaption><b>Architecture.</b> <b>Stage 1:</b> the embedder predicts a residual that is composed with the cover image. The extractor recovers the watermark only with the correct key and outputs an all-zero message otherwise. <b>Stage 2:</b> a trainable copy of the embedder learns to output the same residual when given the <em>watermarked</em> image, so it can be subtracted to remove the watermark. <b>CAM:</b> the key <span class="mono">k</span> is embedded as <span class="mono">e<sub>k</sub> = φ(k)</span>, projected to <span class="mono">(γ<sub>k</sub>, β<sub>k</sub>)</span>, and used to modulate intermediate feature maps.</figcaption>
+                </figure>
+
+                <div class="steps">
+                    <div class="card step reveal">
+                        <span class="num">Module</span>
+                        <h4>Conditional Access Module</h4>
+                        <p>A 100-bit key passes through a 3-layer MLP <span class="mono">φ</span> to a 64-d embedding shared by both networks. A linear layer <span class="mono">ψ</span> produces channel-wise scale and shift terms, applied at the embedder bottleneck and right before the extractor's prediction head.</p>
+                        <div class="eq">\[ \begin{gathered} [\gamma_k,\beta_k]=\psi(\phi(k)) \\ \mathrm{CAM}(F,k)=\gamma_k\odot F+\beta_k \end{gathered} \]</div>
+                    </div>
+                    <div class="card step reveal">
+                        <span class="num">Stage 1</span>
+                        <h4>Key-conditioned embedding</h4>
+                        <p>A U-Net embedder (13.3M params) and a ConvNeXt-Base extractor are trained with image-quality, message and adversarial losses. Each iteration adds a <em>wrong-key</em> step whose target is an invalid all-zero codeword, widening the authorised/unauthorised gap.</p>
+                        <div class="eq">\[ \begin{aligned} \mathcal{L}^{\text{wrong}}_{\text{S1}} = {} & \lambda_{\text{img}}\mathcal{L}_{\text{img}}+\lambda_{\text{adv}}\mathcal{L}_{\text{GAN}} \\ & +\lambda_{\text{sec}}\mathcal{L}_{\text{BCE}}(\hat m',\mathbf{0}) \end{aligned} \]</div>
+                    </div>
+                    <div class="card step reveal">
+                        <span class="num">Stage 2</span>
+                        <h4>Key-conditioned removal</h4>
+                        <p>A frozen Stage 1 embedder makes the reference residual. A trainable embedder sees the <em>watermarked</em> image and must reproduce it in logit space under the correct key, and shrink it to zero under a wrong key. The two stages alternate in 5-epoch cycles.</p>
+                        <div class="eq">\[ \begin{gathered} \mathcal{L}^{\text{corr}}_{\text{S2}}=\lVert\Delta z_{\text{rem}}-\Delta z^\star\rVert_1 \\ \mathcal{L}^{\text{wrong}}_{\text{S2}}=\lVert\Delta z'_{\text{rem}}\rVert_1 \end{gathered} \]</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===================== Results ===================== -->
+        <section class="section" id="results">
+            <div class="wrap">
+                <h2>Comparison with State-of-the-Art</h2>
+                <p class="lede">With the correct key, FiLM-CAM decodes ~99% of bits at 46.6–48.2 dB PSNR, comparable to or better than state-of-the-art neural watermarking methods. With a wrong key, bit accuracy drops to 0.53–0.55 (chance level is 0.50).</p>
+
+                <div class="toolbar">
+                    <div class="seg" role="tablist" aria-label="Evaluation dataset" id="sotaTabs">
+                        <button role="tab" aria-selected="true" data-i="0">COCO</button>
+                        <button role="tab" aria-selected="false" data-i="1">DIV2K</button>
+                        <button role="tab" aria-selected="false" data-i="2">SA-1B</button>
+                    </div>
+                    <span class="toolbar-note">★ best among correct-key rows · ↑ higher is better · ↓ lower is better</span>
+                </div>
+                <div class="card table-card reveal">
+                    <div class="table-wrap">
+                        <table id="sotaTable">
+                            <thead>
+                                <tr><th>Method</th><th>Payload</th><th>Bit acc. ↑</th><th>PSNR ↑</th><th>SSIM ↑</th><th>LPIPS ↓</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="table-foot">† FiLM-CAM embeds a 100-bit payload, conditioned on a separate 100-bit key. Only the payload is recovered at decoding, and the key is not counted towards capacity. For wrong-key rows, bit accuracy near 0.50 is the desired outcome. “Noise” is the variant trained with the robustness noise layer.</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ===================== Visual Results ===================== -->
+        <section class="section" id="visual">
+            <div class="wrap">
+                <h2>Visual Results</h2>
+                <p class="lede">FiLM-CAM outputs on 20 COCO images: cover, watermarked image, image after removal, and the embedding and removal residuals (amplified 10×). Drag the divider to compare two layers.</p>
+
+                <div class="card viewer reveal" id="viewer">
+                    <div class="viewer-top">
+                        <div class="chips" id="viewerPresets" role="group" aria-label="Comparison">
+                            <button class="chip" data-l="cover" data-r="wm" aria-pressed="true">Cover ↔ Watermarked</button>
+                            <button class="chip" data-l="wm" data-r="rec" aria-pressed="false">Watermarked ↔ Removed</button>
+                            <button class="chip" data-l="cover" data-r="rec" aria-pressed="false">Cover ↔ Removed</button>
+                            <button class="chip" data-l="wm" data-r="res" aria-pressed="false">Watermarked ↔ Residual ×10</button>
+                            <button class="chip" data-l="res" data-r="remres" aria-pressed="false">Embedding ↔ Removal residual</button>
+                            <button class="chip" data-l="cover" data-r="abs" aria-pressed="false">Cover ↔ |Residual| ×10</button>
+                        </div>
+                    </div>
+                    <div class="viewer-body">
+                        <div class="compare" id="compare" style="aspect-ratio: 586 / 640">
+                            <img class="base" alt="" id="cmpBase">
+                            <img class="top" alt="" id="cmpTop">
+                            <span class="cmp-tag l" id="tagL">Cover</span>
+                            <span class="cmp-tag r" id="tagR">Watermarked</span>
+                            <div class="handle" id="cmpHandle" role="slider" tabindex="0" aria-label="Comparison divider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+                                <div class="knob"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6M15 6l6 6-6 6"/></svg></div>
+                            </div>
+                        </div>
+                        <div class="thumbs" id="thumbs" role="group" aria-label="Choose an image"></div>
+                    </div>
+                </div>
+
+                <figure class="figure reveal">
+                    <div class="card"><img src="images/comparison.webp" width="2600" height="1306" alt="Side-by-side comparison of cover, watermarked image and absolute residual (×10) for FiLM-CAM, TrustMark-Q, InvisMark, PixelSeal, RoSteALS, SSL and MBRS." loading="lazy" data-zoom></div>
+                    <figcaption><b>Comparison with baselines.</b> Cover, watermarked image and |residual| ×10 for FiLM-CAM and six baselines. Click to enlarge.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ===================== Conditional Decoding ===================== -->
+        <section class="section" id="conditional">
+            <div class="wrap">
+                <h2>Conditional Decoding</h2>
+                <div class="grid-2">
+                    <div class="prose">
+                        <p>To measure how strongly unauthorised decoding fails, we report the <strong>bit error rate under a wrong key</strong>. Higher is better: 50% means the output is indistinguishable from random guessing.</p>
+                        <p>FiLM-CAM is close to that ideal (46–47%). A key-based FNNS baseline still leaks a large part of the payload (23–29% BER). SSL also reaches 50% with a fully wrong carrier, but its accuracy rises steadily as the carrier gets closer to the true one. FiLM-CAM stays near chance up to ~80% key correctness and only recovers the payload once the key is almost exact (figure below).</p>
+                        <p>Key-conditioning is visible in the residuals themselves: the same image and payload embedded under two different keys produce visibly different high-frequency patterns.</p>
+                    </div>
+                    <div class="card table-card reveal" style="align-self:start">
+                        <div class="table-wrap">
+                            <table>
+                                <thead><tr><th>Wrong-key BER (%) ↑</th><th>COCO</th><th>DIV2K</th></tr></thead>
+                                <tbody>
+                                    <tr><td>SSL (wrong carrier)</td><td>50</td><td>50</td></tr>
+                                    <tr><td>Key-based FNNS</td><td>29</td><td>23</td></tr>
+                                    <tr class="ours"><td>FiLM-CAM</td><td>47</td><td>46</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <figure class="figure reveal">
+                    <div class="card"><img src="images/key_correctness.webp" width="990" height="589" alt="Bit accuracy versus key correctness: SSL rises steadily from 50% to 100%, while FiLM-CAM stays near 50–60% up to 80% key correctness and climbs to 99.5% only as the key becomes fully correct. FiLM-CAM removal PSNR rises from about 55 to 59.5 dB." loading="lazy" data-zoom style="max-width: 760px; margin-inline: auto"></div>
+                    <figcaption><b>Key correctness.</b> Bit accuracy as a function of key correctness, the share of query-key bits that match the true key. SSL leaks the payload gradually as the carrier gets closer. FiLM-CAM stays near chance up to ~80% key correctness, then climbs steeply to ~99% for the exact key. Removal PSNR (green, right axis) also improves only as the key approaches the true one.</figcaption>
+                </figure>
+
+                <figure class="figure reveal">
+                    <div class="card"><img src="images/residual_keys.webp" width="1800" height="2057" alt="Embedding residuals for the same image under Key A and Key B differ; removal with the correct Key A reaches 55 dB while wrong keys B, C, D reach 49–50 dB." loading="lazy" data-zoom style="max-width: 640px; margin-inline: auto"></div>
+                    <figcaption><b>Key-dependent residuals.</b> Top: embedding the same image with Key A and Key B gives distinct residual patterns (their difference is shown on the right). Bottom: removal with the correct Key A reconstructs the cover at 55 dB. Wrong keys B, C and D leave a residual behind and reach only 49–50 dB.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ===================== Removal ===================== -->
+        <section class="section" id="removal">
+            <div class="wrap">
+                <h2>Watermark Removal</h2>
+                <p class="lede">Regeneration-based removal attacks reduce post-removal bit accuracy to chance but reach only 20–31 dB PSNR. With the correct key, FiLM-CAM removes the watermark at 54.0–57.9 dB PSNR in 5 ms. With a wrong key, post-removal bit accuracy stays at 0.78–0.81.</p>
+
+                <div class="toolbar">
+                    <div class="seg" role="tablist" aria-label="Evaluation dataset" id="remTabs">
+                        <button role="tab" aria-selected="true" data-i="0">COCO</button>
+                        <button role="tab" aria-selected="false" data-i="1">DIV2K</button>
+                        <button role="tab" aria-selected="false" data-i="2">SA-1B</button>
+                    </div>
+                    <span class="toolbar-note">FiLM-CAM rows use the noise-trained model</span>
+                </div>
+
+                <div class="card chart-card reveal">
+                    <div class="chart-head">
+                        <div>
+                            <div class="chart-title">Removal fidelity vs. what's left of the watermark</div>
+                            <div class="chart-sub">Each dot is a removal method. Top-left = watermark erased and image intact.</div>
+                        </div>
+                        <div class="legend">
+                            <span><i class="dt" style="--c: var(--blue)"></i>FiLM-CAM, correct key</span>
+                            <span><i class="dt" style="--c: var(--orange)"></i>FiLM-CAM, wrong key</span>
+                            <span><i class="dt" style="--c: #a3a29c"></i>Removal baselines</span>
+                        </div>
+                    </div>
+                    <div class="chart" id="remChart"></div>
+                </div>
+
+                <div class="card table-card reveal" style="margin-top:16px">
+                    <div class="table-wrap">
+                        <table id="remTable">
+                            <thead><tr><th>Method</th><th>Removal PSNR ↑</th><th>Post-removal acc.</th><th>PSNR gain ↑</th><th>Time (ms) ↓</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="table-foot">PSNR gain is relative to the watermarked image. For baselines and correct-key FiLM-CAM, post-removal accuracy near 0.50 means the watermark is erased. For the wrong key, <em>higher</em> is desirable: the watermark should survive an unauthorised removal attempt.</div>
+                </div>
+
+                <h3>Re-Watermarking</h3>
+                <p class="prose">Repeatedly embedding new watermarks on top of each other accumulates distortion fast. Embedding, removing and re-embedding (the workflow FiLM-CAM enables) keeps both the watermarked and recovered images close to the original over ten cycles.</p>
+                <figure class="figure reveal">
+                    <div class="card"><img src="images/rewatermarking.webp" width="2400" height="655" alt="Two line plots over 10 watermark iterations: repeated re-watermarking drops bit accuracy to about 75% and PSNR to about 31 dB, while the watermark-remove cycle keeps bit accuracy above 96% and PSNR around 46–48 dB." loading="lazy" data-zoom></div>
+                    <figcaption><b>Left:</b> bit accuracy over iterations. Naïve repeated watermarking (blue) degrades to ~75%, while the watermark→remove cycle (red) stays above 96%. On the recovered images (green), accuracy stays near chance, so each removal works. <b>Right:</b> PSNR against the original cover. Repeated watermarking falls to ~31 dB, while the cycle keeps the watermarked image near 47 dB and the recovered image between 59 and 48 dB.</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ===================== Ablations ===================== -->
+        <section class="section" id="ablations">
+            <div class="wrap">
+                <h2>Ablations</h2>
+
+                <div class="card table-card reveal" style="margin-top:24px">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Variant (DIV2K)</th><th>Bit acc. ↑</th><th>WM PSNR ↑</th><th>Removal PSNR ↑</th><th>Post-removal acc. ↓</th></tr></thead>
+                            <tbody>
+                                <tr><td>w/o FiLM (key fed directly)</td><td>0.85</td><td>36.9</td><td>47.3</td><td>0.62</td></tr>
+                                <tr><td>w/o gain</td><td>0.99</td><td>36.0</td><td>44.0</td><td>0.51</td></tr>
+                                <tr><td>w/o logit space (additive)</td><td>0.98</td><td>47.0</td><td>54.1</td><td>0.55</td></tr>
+                                <tr class="ours"><td>FiLM-CAM</td><td>0.99</td><td>46.7</td><td>55.4</td><td>0.54</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="pillars">
+                    <div class="card pillar reveal">
+                        <h4>Without FiLM</h4>
+                        <p>Feeding the key directly to the embedder stops training from converging: bit accuracy drops to 0.85 and removal quality to 47.3 dB.</p>
+                    </div>
+                    <div class="card pillar reveal">
+                        <h4>Without the gain</h4>
+                        <p>Decoding stays intact, but watermarked and removal quality fall by over 10 dB, and iterative refinement no longer works.</p>
+                    </div>
+                    <div class="card pillar reveal">
+                        <h4>Additive instead of logit space</h4>
+                        <p>Embeds just as well but removes less cleanly: 54.1 vs. 55.4 dB on DIV2K, and 55.5 vs. 59.3 dB on COCO.</p>
+                    </div>
+                </div>
+
+                <div class="grid-2" style="margin-top:28px">
+                    <figure class="reveal">
+                        <div class="card" style="padding:12px"><img src="images/alpha_sweep.webp" width="1350" height="750" alt="Alpha sweep: as alpha increases from 0 to 100, extraction bit accuracy rises from 50% to about 99%, embed PSNR rises slightly, removal PSNR decreases from about 150 to 60 dB, and post-removal bit accuracy stays near 50%." loading="lazy" data-zoom style="cursor:zoom-in"></div>
+                        <figcaption><b>Watermark strength α.</b> Larger α raises extraction accuracy to ~99%, while post-removal accuracy stays near chance: the remover still erases the watermark.</figcaption>
+                    </figure>
+                    <figure class="reveal">
+                        <div class="card" style="padding:12px"><img src="images/refinement.webp" width="1350" height="750" alt="Removal PSNR vs. refinement iterations: correct key rises from 58.1 to about 60 dB, surpassing the cover-guided baseline of 59.48 dB; wrong key saturates around 56.4 dB." loading="lazy" data-zoom style="cursor:zoom-in"></div>
+                        <figcaption><b>Iterative refinement.</b> With the correct key, removal PSNR climbs past the cover-guided baseline within a few iterations. A wrong key saturates ~3.5 dB lower.</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Encoder–Decoder Backbones</h3>
+                <div class="card table-card reveal">
+                    <div class="table-wrap">
+                        <table>
+                            <thead><tr><th>Encoder</th><th>Decoder</th><th>Ext. acc. ↑</th><th>WM PSNR ↑</th><th>Rem. PSNR ↑</th><th>Post-rem. acc. ↓</th></tr></thead>
+                            <tbody>
+                                <tr><td>MUNIT (TrustMark)</td><td style="text-align:left">ResNet-50</td><td>0.97</td><td>41.3</td><td>54.0</td><td>0.67</td></tr>
+                                <tr><td>FiLM-CAM encoder</td><td style="text-align:left">ResNet-50</td><td>0.96</td><td>37.5</td><td>43.1</td><td>0.67</td></tr>
+                                <tr><td>FiLM-CAM encoder</td><td style="text-align:left">ConvNeXt-Tiny</td><td>0.99</td><td>38.6</td><td>49.8</td><td>0.65</td></tr>
+                                <tr><td>FiLM-CAM encoder</td><td style="text-align:left">ConvNeXtV2-Base</td><td>0.98</td><td>38.2</td><td>50.5</td><td>0.60</td></tr>
+                                <tr class="ours"><td>FiLM-CAM encoder</td><td style="text-align:left">ConvNeXt-Base</td><td>0.99</td><td>46.7</td><td>55.4</td><td>0.54</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-foot">DIV2K. The MUNIT row uses TrustMark's encoder, modified to include CAM and logit-space embedding.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== Robustness ===================== -->
+        <section class="section" id="robustness">
+            <div class="wrap">
+                <h2>Robustness Against Attacks</h2>
+                <p class="lede">The noise-trained variant of FiLM-CAM reaches a mean bit accuracy of 96.0% across 21 perturbations on DIV2K, second to PixelSeal (98.0%). The lowest accuracies are under JPEG compression (85.1%) and grayscale conversion (75.7%).</p>
+
+                <div class="toolbar">
+                    <span class="toolbar-note">Extraction bit accuracy (%) on DIV2K. Hover a cell to highlight its row and column.</span>
+                    <div class="scale" aria-hidden="true"><span>50</span><span class="bar" id="heatScale"></span><span>100</span></div>
+                </div>
+                <div class="card heat reveal">
+                    <div class="table-wrap">
+                        <table id="heatTable"></table>
+                    </div>
+                </div>
+
+                <div class="callout reveal">
+                    <div class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg></div>
+                    <div>
+                        <h4>Limitations</h4>
+                        <p>Conditional access prevents key-free <em>decoding</em> and key-free <em>reconstructive</em> removal, but not key-free <em>destruction</em>. Overwriting with another key, or strong diffusion-based regeneration, can disable detection without the key, as with learned watermarking in general. Such attacks do not recover the original cover image. Wrong-key removal also only partially preserves the payload (≈0.78–0.81 bit accuracy). A stronger objective could sharpen this asymmetry further.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== BibTeX ===================== -->
+        <section class="section" id="bibtex">
+            <div class="wrap">
+                <h2>BibTeX</h2>
+                <div class="card bib">
+                    <button class="copy" id="copyBib" type="button">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>
+                        <span>Copy</span>
+                    </button>
+<!-- TODO: paste the BibTeX entry inside <pre>; the Copy button appears automatically once it has text -->
+<pre id="bibText"></pre>
+                </div>
+
+                <p class="ack">This research was funded in part by Adobe Research and in part by DECaDE under the UKRI/EPSRC Grant reference EP/T022485/1.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer>
+        <div class="wrap">
+            <span>FiLM-CAM · NeurIPS 2026</span>
+            <span>Also see <a href="https://yash-research.github.io/multinerf/">MultiNeRF</a> (ICCVW 2025)</span>
+        </div>
+    </footer>
+
+    <dialog class="lightbox" id="lightbox" aria-label="Enlarged figure">
+        <button class="close" type="button" aria-label="Close">×</button>
+        <img alt="">
+    </dialog>
+
+    <div class="tooltip" id="tooltip" role="tooltip"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" defer></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
