@@ -1,0 +1,20 @@
+% Standalone build of the FiLM-CAM architecture figure for the project pages.
+% figure1_tikz.tex is the paper's figure, unchanged; text uses Times as in the NeurIPS style.
+%
+% Rebuild ../../images/method.webp (run from this folder):
+%   pdflatex method.tex
+%   pdftoppm -r 440 -png -singlefile method.pdf method
+%   python -c "from PIL import Image; Image.open('method.png').convert('RGB').save('../../images/method.webp', quality=92)"
+% Then copy images/method.webp to assets/publication/filmcam/method.webp in the
+% yash-research.github.io repo, and update the figure's width/height in ../../index.html.
+% varwidth: typeset in vertical mode, so the spaces after the definitions in figure1_tikz.tex
+% don't add blank width before the picture
+\documentclass[varwidth=50cm,border=4pt]{standalone}
+\usepackage[T1]{fontenc}
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\sfdefault}{phv}
+\usepackage{tikz,graphicx,amsmath,amssymb,xcolor}
+\usetikzlibrary{arrows.meta,calc,fit}
+\begin{document}
+\input{figure1_tikz}
+\end{document}

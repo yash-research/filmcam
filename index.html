@@ -36,8 +36,8 @@
 
             <div class="authors">
                 <span>Yash Kulthe<sup>1,2</sup></span>
-                <span>Vishal Asnani<sup>2</sup></span>
                 <span>Shruti Agarwal<sup>2</sup></span>
+                <span>Vishal Asnani<sup>2</sup></span>
                 <span>Andrew Gilbert<sup>1</sup></span>
                 <span>John Collomosse<sup>1,2</sup></span>
             </div>
@@ -204,8 +204,8 @@
                 <p class="lede">FiLM-CAM injects the key into the internal features of the embedder and extractor through a Conditional Access Module (CAM). Training proceeds in two stages: key-conditioned embedding and decoding, then key-conditioned removal.</p>
 
                 <figure class="figure reveal">
-                    <div class="card"><img src="images/method.webp" width="2400" height="1635" alt="Architecture of FiLM-CAM: Stage 1 key-conditioned embedding and decoding, Stage 2 watermark removal training, and the Conditional Access Module." loading="lazy" data-zoom></div>
-                    <figcaption><b>Architecture.</b> <b>Stage 1:</b> the embedder predicts a residual that is composed with the cover image. The extractor recovers the watermark only with the correct key and outputs an all-zero message otherwise. <b>Stage 2:</b> a trainable copy of the embedder learns to output the same residual when given the <em>watermarked</em> image, so it can be subtracted to remove the watermark. <b>CAM:</b> the key <span class="mono">k</span> is embedded as <span class="mono">e<sub>k</sub> = φ(k)</span>, projected to <span class="mono">(γ<sub>k</sub>, β<sub>k</sub>)</span>, and used to modulate intermediate feature maps.</figcaption>
+                    <div class="card"><img src="images/method.webp" width="2471" height="1682" alt="Architecture of FiLM-CAM: Stage 1 key-conditioned embedding and decoding, Stage 2 watermark removal training, and the Conditional Access Module." loading="lazy" data-zoom></div>
+                    <figcaption><b>Architecture of FiLM-CAM.</b> <b>Stage 1:</b> The Embedder generates watermark residuals, which are added to the cover image, to get a watermarked image. The Extractor recovers the watermark from the image if it receives the correct key and an all-zero bit message in case of an incorrect key. <b>Stage 2:</b> The Embedder network is trained to output residuals when given a watermarked image, such that it can be used to remove the watermark. <b>Conditional Access Module (CAM):</b> A binary key \(k\) is mapped to an embedding \(e_k=\phi(k)\) and transformed via \(\psi\) to produce feature-wise parameters \((\gamma_k,\beta_k)\). These condition the intermediate feature maps via FiLM modulation \(F_{\text{cond}}=\gamma_k \odot F + \beta_k\), enabling key-dependent watermark embedding, decoding, and removal.</figcaption>
                 </figure>
 
                 <div class="steps">

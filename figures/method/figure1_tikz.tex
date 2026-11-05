@@ -1,0 +1,211 @@
+% ---------------------------------------------------------------
+% FiLM-CAM Figure 1 (TikZ), grid layout.
+% * Drawn at TRUE SIZE for a 5.5in NeurIPS text width (13.95cm wide): do NOT rescale.
+%   Printed font sizes: 7.5pt titles, 6.5pt modules, 6pt labels, 5.2pt bit strings.
+% * EVERY arrow uses the single style `arr` (same head, same 0.7pt line) and EVERY
+%   arrow is exactly \gn cm long (one parameter, default 0.36): blocks are placed with one fixed gap.
+%   To change ALL arrow lengths at once edit \gn below (needs ~0.33 to fit 13.95cm).
+% Preamble needs: \usepackage{tikz,graphicx,amsmath,amssymb,xcolor}
+%                 \usetikzlibrary{arrows.meta,calc,fit}
+% Images in images/fig1/: penguin.png (cover / watermarked / removed) and residual.png (residuals)
+% \blanktrue gives empty frames so you can add images later.
+% ---------------------------------------------------------------
+\newif\ifblank \blankfalse
+\newcommand{\figdir}{images/fig1}
+
+\definecolor{cBlue}{HTML}{DCE9FB}   \definecolor{cBlueD}{HTML}{4A7FD1}
+\definecolor{cGreen}{HTML}{DDF3E4}  \definecolor{cGreenD}{HTML}{3E9B5F}
+\definecolor{cOrange}{HTML}{FFE8D0} \definecolor{cOrangeD}{HTML}{E8963A}
+\definecolor{cTeal}{HTML}{D3F1F7}   \definecolor{cTealD}{HTML}{2FA6BF}
+\definecolor{cYellow}{HTML}{FFF3C4} \definecolor{cYellowD}{HTML}{D9B100}
+\definecolor{cPurple}{HTML}{EBDDFB} \definecolor{cPurpleD}{HTML}{8C55D6}
+\definecolor{cPanel}{HTML}{F8FAFC}  \definecolor{cPanelD}{HTML}{94A3B8}
+\definecolor{cRed}{HTML}{E5484D}    \definecolor{cOK}{HTML}{2E9E5B}
+\definecolor{cText}{HTML}{1E293B}   \definecolor{cArrow}{HTML}{475569}
+
+
+% ---- small hand-drawn icons (inline, ~0.2cm) ----
+\definecolor{cKey}{HTML}{B7791F}
+\newcommand{\keyic}{\tikz[baseline=-0.45ex, rounded corners=0pt]{\draw[line width=0.55pt,draw=cKey] (0,0) circle (0.05);
+  \draw[line width=0.55pt,draw=cKey,line cap=round] (0.05,0)--(0.2,0) (0.15,0)--(0.15,-0.055) (0.2,0)--(0.2,-0.05);}}
+\newcommand{\wmic}{\tikz[baseline=-0.5ex, rounded corners=0pt]{%
+  \path[draw=cArrow, fill=white, line width=0.4pt, line join=round] (0,-0.11)--(0,0.11)--(0.09,0.11)--(0.15,0.05)--(0.15,-0.11)--cycle;
+  \draw[line width=0.4pt, draw=cArrow] (0.09,0.11)--(0.09,0.05)--(0.15,0.05);
+  \draw[line width=0.4pt, draw=cYellowD] (0.115,-0.045)--(0.115,-0.02) arc (180:0:0.03) -- (0.175,-0.045);
+  \path[fill=cYellowD] (0.095,-0.115) rectangle (0.195,-0.045);}}
+
+% snowflake icon (frozen weights), drawn at point #1
+\definecolor{cSnow}{HTML}{2F8FD0}
+\newcommand{\snowic}[1]{\begin{scope}[shift={#1}, rounded corners=0pt, line width=0.6pt, draw=cSnow, line cap=round]
+  \foreach \a in {0,60,120}{\draw (\a:0.17)--(\a+180:0.17);}
+  \foreach \a in {0,60,...,300}{\draw (\a:0.11)--++(\a+40:0.06); \draw (\a:0.11)--++(\a-40:0.06);}
+\end{scope}}
+
+\newcommand{\figtitle}[1]{{\bfseries #1}}
+\newcommand{\figmod}[1]{{\bfseries #1}}
+\newcommand{\figlab}[1]{#1}
+\newcommand{\figbits}[1]{{\fontsize{5.2}{6}\selectfont\ttfamily\bfseries #1}}
+\newcommand{\figcap}[1]{{\itshape #1}}
+
+% \tile{name}{anchor}{position}{file}{size}
+\newcommand{\tile}[5]{%
+  \node[anchor=#2, inner sep=0pt, draw=cPanelD, line width=0.5pt] (#1) at #3 {%
+    \ifblank\rule{0pt}{#5}\rule{#5}{0pt}\else\includegraphics[width=#5,height=#5]{\figdir/#4}\fi};}
+% \pillt{name}{style}{anchor}{position}{label}{bits}
+\newcommand{\pillt}[6]{\node[pill, #2, anchor=#3] (#1) at #4 {\figlab{#5}\\\figbits{#6}};}
+
+\newcommand{\ts}{0.8cm}% image tile size (all images)
+\pgfmathsetmacro{\gn}{0.33}% <- the ONE arrow length / block gap (cm)
+\begin{tikzpicture}[
+  x=1cm, y=1cm, >={Stealth[length=3.2pt,width=3pt]}, font=\fontsize{6}{6.8}\selectfont,
+  % ---- the ONE arrow style (all arrows are \gn cm long) ----
+  arr/.style={->, line width=0.7pt, draw=cArrow},
+  panel/.style={draw=black, fill=white, line width=0.8pt, dash pattern=on 3.5pt off 2.5pt, rounded corners=8pt},
+  mod/.style={draw, line width=0.7pt, rounded corners=3pt, align=center, inner sep=2pt, text=cText, font=\fontsize{6.5}{7.4}\selectfont},
+  blue/.style={mod, fill=cBlue, draw=cBlueD}, green/.style={mod, fill=cGreen, draw=cGreenD},
+  orange/.style={mod, fill=cOrange, draw=cOrangeD}, yellow/.style={mod, fill=cYellow, draw=cYellowD},
+  purple/.style={mod, fill=cPurple, draw=cPurpleD},
+  pill/.style={draw, line width=0.6pt, rounded corners=4pt, minimum width=1.3cm, minimum height=0.5cm, inner sep=1pt, align=center, text=cText, font=\fontsize{6}{6.6}\selectfont},
+  tealp/.style={fill=cTeal, draw=cTealD}, orgp/.style={fill=cOrange, draw=cOrangeD},
+  grnp/.style={fill=cOK!15!white, draw=cOK}, redp/.style={fill=cRed!15!white, draw=cRed},
+  plus/.style={circle, draw=cArrow, fill=white, line width=0.6pt, inner sep=0pt, minimum size=0.3cm, font=\fontsize{8}{8}\selectfont, text=cArrow},
+  lab/.style={align=center, text=cText, inner sep=1pt, font=\fontsize{6}{6.8}\selectfont},
+  ttl/.style={align=center, text=cText, inner sep=1pt, font=\fontsize{7.5}{8.5}\selectfont},
+  capst/.style={align=center, text=cText, inner sep=1pt, font=\fontsize{6.5}{7.5}\selectfont},
+  badge/.style={circle, text=white, inner sep=0pt, minimum size=0.28cm, font=\fontsize{6}{6}\selectfont},
+  ]
+
+%=========================== STAGE 1 ===========================
+\path[panel] (0,4.6) rectangle (10.26,9.4);
+\node[ttl, anchor=north west] at (0.1,9.35) {\figtitle{Stage 1: Key-Conditioned Watermark Embedding and Decoding}};
+
+% input column (right edges aligned at x=1.4); main row at y=7.0
+\tile{cov1}{east}{(1.4,7.85)}{penguin.png}{\ts}
+\node[lab] at ($(cov1.north)+(0,0.2)$) {\figlab{Cover}};
+\pillt{wm1}{tealp}{east}{(1.4,7.0)}{\wmic\,Watermark}{010010011..}
+\pillt{key1}{orgp}{east}{(1.4,6.15)}{\keyic\,Key}{010010011..}
+
+\node[blue, anchor=west, minimum width=1.15cm, minimum height=2.6cm] (emb) at ($(1.4,7.0)+(\gn,0)$) {\figmod{Embedder}};
+\draw[arr] (cov1.east)--(emb.west |- cov1.east);
+\draw[arr] (wm1.east)--(emb.west |- wm1.east);
+\draw[arr] (key1.east)--(emb.west |- key1.east);
+
+\tile{res1}{west}{($(emb.east)+(\gn,0)$)}{residual.png}{\ts}
+\node[lab] at ($(res1.north)+(0,0.2)$) {\figlab{Residual}};
+\draw[arr] (emb.east)--(res1.west);
+\node[plus, anchor=west] (pl1) at ($(res1.east)+(\gn,0)$) {+};
+\draw[arr] (res1.east)--(pl1.west);
+% label with an arrow up to the + (same arrow style)
+\node[lab, anchor=north] (cl1) at ($(pl1.south)+(0,-\gn)$) {\figlab{Watermark}\\\figlab{Composition}};
+\draw[arr] (cl1.north)--(pl1.south);
+\tile{wmd1}{west}{($(pl1.east)+(\gn,0)$)}{penguin.png}{\ts}
+\node[lab] at ($(wmd1.north)+(0,0.28)$) {\figlab{Watermarked}\\\figlab{Image}};
+\draw[arr] (pl1.east)--(wmd1.west);
+
+\node[yellow, anchor=west, minimum width=0.75cm, minimum height=2.0cm] (noise) at ($(wmd1.east)+(\gn,0)$) {\figmod{Noise}\\\figmod{Layer}};
+\draw[arr] (wmd1.east)--(noise.west);
+
+\node[green, anchor=west, minimum width=1.05cm, minimum height=0.55cm] (ex1) at ($(noise.east)+(\gn,0.8)$) {\figmod{Extractor}};
+\node[green, anchor=west, minimum width=1.05cm, minimum height=0.55cm] (ex2) at ($(noise.east)+(\gn,-0.8)$) {\figmod{Extractor}};
+\draw[arr] (noise.east |- ex1.west)--(ex1.west);
+\draw[arr] (noise.east |- ex2.west)--(ex2.west);
+
+\pillt{ck}{orgp}{south}{($(ex1.north)+(0,\gn)$)}{\keyic\,\textcolor{cOK}{\bfseries Correct key}}{010010011..}
+\draw[arr] (ck.south)--(ex1.north);
+\pillt{wk}{orgp}{north}{($(ex2.south)+(0,-\gn)$)}{\keyic\,\textcolor{cRed}{\bfseries Wrong key}}{110111000..}
+\draw[arr] (wk.north)--(ex2.south);
+
+\pillt{out1}{grnp}{west}{($(ex1.east)+(\gn,0)$)}{\wmic\,Decoded\\watermark}{010010011..}
+\draw[arr] (ex1.east)--(out1.west);
+\node[badge, fill=cOK] at ($(out1.north east)+(-0.1,0)$) {$\checkmark$};
+\pillt{out2}{redp}{west}{($(ex2.east)+(\gn,0)$)}{\wmic\,All-zero\\output}{00000000..}
+\draw[arr] (ex2.east)--(out2.west);
+\node[badge, fill=cRed] at ($(out2.north east)+(-0.1,0)$) {$\times$};
+
+\node[capst] at (5.13,4.85) {\figcap{Correct key enables message extraction; wrong key suppresses decoding}};
+
+%=========================== CAM ===========================
+\path[panel] (10.34,4.6) rectangle (13.95,9.4);
+\node[ttl] at (12.145,8.9) {\figtitle{Conditional Access}\\\figtitle{Module (CAM)}};
+
+\node[orange, anchor=west, minimum width=2.3cm, minimum height=0.7cm] (ke) at (11.46,8.0) {\figmod{Key Embedding}\\\figlab{$e_k=\phi(k)$}};
+\node[lab, anchor=east] (kk) at ($(ke.west)+(-\gn,0)$) {\figmod{Key $k$}};
+\draw[arr] (kk.east)--(ke.west);
+\node[yellow, anchor=north, minimum width=2.3cm, minimum height=0.7cm] (fg) at ($(ke.south)+(0,-\gn)$) {\figmod{FiLM Generator}\\\figlab{$[\gamma_k,\beta_k]=\psi(e_k)$}};
+\draw[arr] (ke.south)--(fg.north);
+\node[purple, anchor=north, minimum width=2.3cm, minimum height=0.75cm] (fm) at ($(fg.south)+(0,-\gn)$) {\figmod{FiLM Modulation}\\{\fontsize{5.3}{6.2}\selectfont $F_{\mathrm{cond}}{=}\gamma_k{\odot}F{+}\beta_k$}};
+\draw[arr] ($(fg.south)+(-0.5,0)$)--($(fm.north)+(-0.5,0)$);
+\draw[arr] ($(fg.south)+(0.5,0)$)--($(fm.north)+(0.5,0)$);
+\node[lab, anchor=east] at ($(fg.south)+(-0.55,-0.5*\gn)$) {\figmod{$\gamma_k$}};
+\node[lab, anchor=west] at ($(fg.south)+(0.55,-0.5*\gn)$) {\figmod{$\beta_k$}};
+\node[lab, anchor=east] (fmap) at ($(fm.west)+(-\gn,0)$) {\figlab{Feature}\\\figlab{Map $F$}};
+\draw[arr] (fmap.east)--(fm.west);
+\node[lab, anchor=north] (co) at ($(fm.south)+(0,-\gn)$) {\figlab{Conditioned}\\\figlab{Feature Map}};
+\draw[arr] (fm.south)--(co.north);
+
+%=========================== STAGE 2 ===========================
+\path[panel] (0,0) rectangle (13.95,4.5);
+\node[ttl, anchor=north west] at (0.1,4.45) {\figtitle{Stage 2: Watermark Removal Training}};
+
+\begin{scope}[shift={(0.6,0)}]% main Stage 2 diagram nudged right
+% top row y=3.26 (T), bottom row y=1.1 (B): T-B = emb height + 2*gn + pill height
+\pgfmathsetmacro{\busx}{1.5+\gn}
+\tile{cov2}{east}{(\busx,3.36)}{penguin.png}{\ts}
+\node[lab] at ($(cov2.north)+(0,0.17)$) {\figlab{Cover}};
+\node[blue, anchor=west, minimum width=2.3cm, minimum height=1.0cm] (fe) at ($(\busx,3.26)+(\gn,0)$) {\figmod{Frozen Embedder}};
+\snowic{($(fe.north east)+(-0.28,-0.25)$)}
+\draw[arr] (cov2.east)--(fe.west |- cov2.east);
+\tile{r1}{west}{($(fe.east)+(\gn,0)$)}{residual.png}{\ts}
+\node[lab] at ($(r1.north)+(0,0.17)$) {\figlab{Residual ($R_1$)}};
+\draw[arr] (fe.east)--(r1.west |- fe.east);
+\node[plus, anchor=west] (pl2) at ($(r1.east)+(\gn,0)$) {+};
+\draw[arr] (r1.east)--(pl2.west);
+\node[lab, anchor=north] (cl2) at ($(pl2.south)+(0,-\gn)$) {\figlab{Watermark}\\\figlab{Composition}};
+\draw[arr] (cl2.north)--(pl2.south);
+\tile{wmd2}{west}{($(pl2.east)+(\gn,0)$)}{penguin.png}{\ts}
+\node[lab] at ($(wmd2.north)+(0,0.17)$) {\figlab{Watermarked Image}};
+\draw[arr] (pl2.east)--(wmd2.west);
+
+\tile{wi2}{east}{(\busx,1.0)}{penguin.png}{\ts}
+\node[lab] at ($(wi2.south)+(0,-0.3)$) {\figlab{Watermarked}\\\figlab{Image}};
+\node[blue, anchor=west, minimum width=2.3cm, minimum height=1.0cm] (te) at ($(\busx,1.1)+(\gn,0)$) {\figmod{Trainable Embedder}\\{\itshape From last stage 1 cycle}};
+\draw[arr] (wi2.east)--(te.west |- wi2.east);
+\tile{r2}{west}{($(te.east)+(\gn,0)$)}{residual.png}{\ts}
+\node[lab] at ($(r2.south)+(0,-0.17)$) {\figlab{Residual ($R_2$)}};
+\draw[arr] (te.east)--(r2.west |- te.east);
+
+% watermark: one stem from the pill splits into two arrows (to BOTH embedders)
+\pillt{wm2}{tealp}{east}{(1.5,2.18)}{\wmic\,Watermark}{010010011..}
+\draw[line width=0.7pt, draw=cArrow] (wm2.east)--(\busx,2.18);
+\draw[line width=0.7pt, draw=cArrow] (\busx,1.52)--(\busx,2.84);
+\fill[cArrow] (\busx,2.18) circle (1.4pt);
+\draw[arr] (\busx,2.84)--(fe.west |- 0,2.84);
+\draw[arr] (\busx,1.52)--(te.west |- 0,1.52);
+% key: between the embedders, arrows to BOTH
+\pillt{k2}{orgp}{center}{($(fe.south)!0.5!(te.north)$)}{\keyic\,Key}{010010011..}
+\draw[arr] (k2.north)--(k2.north |- fe.south);
+\draw[arr] (k2.south)--(k2.south |- te.north);
+
+% L1 loss between residuals
+\node[draw=cPanelD, fill=white, rounded corners=3pt, line width=0.6pt, minimum width=0.6cm, minimum height=0.7cm, align=center] (l1) at ($(r1.south)!0.5!(r2.north)$) {\figlab{$L_1$}\\\figlab{loss}};
+\draw[arr] (r1.south)--(r1.south |- l1.north);
+\draw[arr] (r2.north)--(r2.north |- l1.south);
+
+\end{scope}
+
+% inference: removal needs BOTH the watermarked image and the residual of the trained embedder
+\path[draw=cPurpleD, dash pattern=on 3pt off 2pt, line width=0.7pt, rounded corners=5pt, fill=white] (9.0,0.85) rectangle (13.7,3.7);
+\node[anchor=north west, text=cPurpleD, font=\fontsize{7}{8}\selectfont\bfseries] at (9.1,3.65) {Inference time};
+\tile{ri3}{west}{(9.55,2.0)}{residual.png}{\ts}
+\node[lab] at ($(ri3.south)+(0,-0.37)$) {\figlab{Residual}\\\figlab{(trained}\\\figlab{embedder)}};
+\node[purple, anchor=west, minimum width=1.5cm, minimum height=0.7cm] (rm) at ($(ri3.east)+(\gn,0)$) {\figmod{Watermark}\\\figmod{Removal}};
+\draw[arr] (ri3.east)--(rm.west |- ri3.east);
+\tile{wi3}{south}{($(rm.north)+(0,\gn)$)}{penguin.png}{\ts}
+\node[lab, anchor=west, align=left] at ($(wi3.east)+(0.08,0)$) {\figlab{Watermarked}\\\figlab{Image}};
+\draw[arr] (wi3.south)--(rm.north);
+\tile{wo}{west}{($(rm.east)+(\gn,0)$)}{penguin.png}{\ts}
+\node[lab] at ($(wo.south)+(0,-0.37)$) {\figlab{Watermark}\\\figlab{Removed}\\\figlab{Image}};
+\draw[arr] (rm.east)--(wo.west);
+
+\node[capst, anchor=west] at (6.7,0.3) {\figcap{Correct key removes the watermark most efficiently}};
+\end{tikzpicture}
